@@ -22,11 +22,14 @@
     </style>
 </head>
 <body>
+<header style="margin: 20px">
+    <h2>Websocket聊天室（id:<span id="roomId"></span>）&nbsp;<button id="status" style="background-color: darkorange">正在连接...</button><button><a href="http://github.com/haowanxing/bullet-text-chatroom" style="text-decoration:none;"  target="_blank">项目地址</a></button></h2>
+</header>
 <div class="screen_container"></div>
 <div class="screen_toolbar">
     <input id="screenBulletText" type="text" placeholder="请输入弹幕内容"/>
     <button class="send">发射</button>
-    <button class="clear">关闭弹幕</button>
+    <button class="clear">清屏按钮</button>
 </div>
 </body>
 <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -46,13 +49,16 @@
             biubiubiu(data.data);
         };
         this.ws.onclose = function () {
+            $('#status').css("background-color","red").text("连接断开");
             _this.reConnect();
         };
         this.ws.onopen = function () {
             console.log("已连接！");
             _this.changeRoom(roomId);
+            $('#status').css("background-color","chartreuse").text("连接成功");
         };
         this.ws.onerror = function (e) {
+            $('#status').css("background-color","red").text("连接断开");
             console.log("发生错误："+e)
         }
     };
@@ -89,6 +95,7 @@
 
     $(function () {
         roomId = window.location.pathname.slice(1);
+        $("#roomId").html(roomId);
         client.connect();
 
     });
