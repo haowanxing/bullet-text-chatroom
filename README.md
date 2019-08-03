@@ -2,8 +2,8 @@
 [![Build Status](https://www.travis-ci.org/haowanxing/bullet-text-chatroom.svg?branch=master)](https://www.travis-ci.org/haowanxing/bullet-text-chatroom)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/haowanxing/bullet-text-chatroom/blob/master/LICENSE)
 
-> 利用Go-Websocket实现的弹幕聊天室
-项目地址：https://github.com/haowanxing/bullet-text-chatroom
+> 利用Go-Websocket实现的弹幕聊天室  
+项目地址：https://github.com/haowanxing/bullet-text-chatroom  
 此项目为个人学习练手项目，欢迎各路大神轻踩
 
 ### 项目介绍
