@@ -8,14 +8,14 @@
     <style>
         .screen_container{
             position: relative;
-            width: 600px;
+            width: 95%;
             height: 400px;
             margin: 30px auto;
             background: #000;
             overflow: hidden;
         }
         .screen_toolbar{
-            width: 600px;
+            width: 95%;
             margin: 20px auto;
             text-align: center;
         }
@@ -31,16 +31,83 @@
 </body>
 <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript">
+
+    let roomId = "";
+    let client = {
+        ws: null,
+        name: "匿名"+Date.now().toString()
+    };
+    //连接websocket
+    client.connect = function(){
+        let _this = this;
+        this.ws = new WebSocket("ws://"+ window.location.host +"/ws");
+        this.ws.onmessage = function(e) {
+            let data = eval('(' + e.data + ')');
+            biubiubiu(data.data);
+        };
+        this.ws.onclose = function () {
+            _this.reConnect();
+        };
+        this.ws.onopen = function () {
+            console.log("已连接！");
+            _this.changeRoom(roomId);
+        };
+        this.ws.onerror = function (e) {
+            console.log("发生错误："+e)
+        }
+    };
+    //重连websocket
+    client.reConnect = function(){
+        let _this = this;
+        setTimeout(function(){
+            _this.connect();
+        },1000);
+    };
+    //发送消息
+    client.sendText = function(text){
+        let msg = {
+            "event":"text",
+            "data":text
+        };
+        this.ws.send(JSON.stringify(msg))
+    };
+    client.changeName = function(name){
+        let msg = {
+            "event":"name",
+            "data":name
+        };
+        this.ws.send(JSON.stringify(msg))
+    };
+    client.changeRoom = function(room){
+        let msg = {
+            "event":"room",
+            "data":room
+        };
+        this.ws.send(JSON.stringify(msg))
+    };
+
+
+    $(function () {
+        roomId = window.location.pathname.slice(1);
+        client.connect();
+
+    });
+
     // 弹幕定时器
-    var timers = [];
+    let timers = [];
     // 控制弹幕显隐变量
-    var isShow = true;
-    // 监听发送按钮
-    $(".send").on("click", function () {
+    let isShow = true;
+    // 弹幕biubiubiu
+    function biubiubiu(text){
         // 创建弹幕
-        var jqueryDom = createScreenbullet($("#screenBulletText").val());
+        var jqueryDom = createScreenbullet(text);
         // 添加定时任务
         addInterval(jqueryDom);
+    }
+    // 监听发送按钮
+    $(".send").on("click", function () {
+        client.sendText($("#screenBulletText").val());
+        $("#screenBulletText").val("")
     });
     // 监听关闭弹幕按钮
     $(".clear").on("click", function () {
