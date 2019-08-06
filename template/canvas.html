@@ -8,7 +8,7 @@
 </head>
 <body>
 <header style="margin: 20px">
-    <h2>Canvas-Websocket聊天室（id:<span id="roomId"></span>）&nbsp;<button id="status" style="background-color: darkorange">正在连接...</button><button><a href="http://github.com/haowanxing/bullet-text-chatroom" style="text-decoration:none;"  target="_blank">项目地址</a></button></h2>
+    <h2>Canvas-Websocket聊天室（id:<span id="roomId"></span>）&nbsp;<button id="status" style="background-color: darkorange">正在连接...</button><button><a href="http://github.com/haowanxing/bullet-text-chatroom" style="text-decoration:none;" target="_blank">项目地址</a></button></h2>
 </header>
 <!--弹幕实现来源：https://www.bestvist.com/p/36 作者：bestvist-->
 <!--弹幕实现来源：https://segmentfault.com/a/1190000011723466 作者：bestvist-->
@@ -17,9 +17,14 @@
         您的浏览器不支持canvas标签。
     </canvas>
 </div>
+<div id="messages" style=" height: 100px; overflow: auto; border: solid 1px gray; padding: 5px; ">
+
+</div>
 <div class="screen_toolbar">
     <label for="screenBulletText"></label><input id="screenBulletText" type="text" placeholder="请输入弹幕内容"/>
-    <button class="send">发射</button>
+    <button id="send">发射</button>
+    <label for="name"></label><input id="name" type="text" placeholder="新的名字"/>
+    <button id="changeName">改名</button>
 </div>
 <script src="/statics/js/client.js"></script>
 <script>
@@ -98,29 +103,43 @@
         let barrage = new Barrage('canvas');
         barrage.draw();
 
-        let foo = function(data){
-            barrage.shoot(data.data);
+        let foo = function (data) {
+            if(data.event == "text"){
+                barrage.shoot(data.data);
+            }
+            let p = document.createElement("p");
+            p.style.margin = "0";
+            p.innerText = "[" + (data.time).split(" ")[1] + "] " + data.from + ": " + data.data;
+            let Div = document.getElementById("messages");
+            Div.append(p);
+            Div.scrollTop = (Div.scrollHeight);
         };
         let roomId = window.location.pathname.slice(1);
         let client = new Client(foo);
-        client.wsOnOpen(function(e){
+        client.wsOnOpen(function (e) {
             client.changeRoom(roomId);
-            document.getElementById("roomId").value = roomId;
+            document.getElementById("roomId").innerText = roomId;
             document.getElementById("status").style.backgroundColor = "chartreuse";
             document.getElementById("status").innerText = "连接成功";
+            // client.changeName("匿名用户" + (new Date()).valueOf().toString().slice(-5));
         });
-        let onClose = function(e){
+        let onClose = function (e) {
             document.getElementById("status").style.backgroundColor = "red";
             document.getElementById("status").innerText = "连接断开";
         };
         client.wsOnClose(onClose);
         client.wsOnError(onClose);
         client.connect();
-        document.getElementsByClassName("send")[0].onclick = function(){
+        document.getElementById("send").onclick = function () {
             let msg = document.getElementById("screenBulletText").value;
             client.sendText(msg);
             document.getElementById("screenBulletText").value = "";
-        }
+        };
+        document.getElementById("changeName").onclick = function () {
+            let msg = document.getElementById("name").value;
+            client.changeName(msg);
+            document.getElementById("name").value = "";
+        };
 
     })();
 

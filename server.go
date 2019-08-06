@@ -49,12 +49,13 @@ func server(port int) {
 
 func WsHandler(ws *websocket.Conn) {
 	client := &Client{
-		id:       time.Now().String(),
-		roomId:   "",
+		id:       "匿名用户" + fmt.Sprintf("%d", time.Now().UnixNano()/1e6)[8:],
+		roomId:   broadcastRoomId,
 		socket:   ws,
 		sendChan: make(chan Msg, 1024),
 	}
-	manager.register <- client
+	manager.Join(client)
+	//manager.register <- client
 	go client.shit()
 	client.eat()
 }

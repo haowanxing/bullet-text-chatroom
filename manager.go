@@ -1,13 +1,18 @@
 package bullet_text_chatroom
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 const (
-	timeLayout      = "2006-01-02 15:04:05"
-	broadcastRoomId = "GodSeeUTomorrow"
+	timeLayout        = "2006-01-02 15:04:05"
+	broadcastRoomId   = "GodSeeUTomorrow"
+	systemEventNotice = "notice"
 )
 
 type Msg struct {
+	Event  string `json:"event"`
 	Data   string `json:"data"`
 	From   string `json:"from"`
 	RoomId string `json:"roomId"`
@@ -62,7 +67,16 @@ func (manager *ClientManager) Join(client *Client) {
 }
 
 func (manager *ClientManager) Leave(client *Client) {
+	name := client.id
+	room := client.roomId
 	manager.unregister <- client
+	manager.broadcast <- Msg{
+		Event:  systemEventNotice,
+		Data:   name + "离开聊天室",
+		From:   "系统消息",
+		RoomId: room,
+		Time:   time.Now().Format(timeLayout),
+	}
 }
 
 func (manager *ClientManager) DealMsg(msg Msg) {

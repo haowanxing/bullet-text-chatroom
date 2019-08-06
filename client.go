@@ -46,8 +46,10 @@ func (client *Client) shit() {
 		if err := websocket.Message.Receive(client.socket, &shit); err != nil {
 			if err != io.EOF {
 				log.Printf("[System] can not catch client's shit. so dirty: %+v", err)
-				manager.Leave(client)
+			} else {
+				log.Printf("[System] client Leave: %+v", client.id)
 			}
+			manager.Leave(client)
 			break
 		}
 		var msg = &ClientMsg{Time: time.Now().Format(timeLayout)}
@@ -61,16 +63,26 @@ func (client *Client) shit() {
 		case clientEventName:
 			client.id = msg.Data
 		case clientEventRoom:
-			if broadcastRoomId != msg.Data {
+			if broadcastRoomId != msg.Data && client.roomId != msg.Data {
 				client.roomId = msg.Data
+				manager.DealMsg(Msg{
+					Event:  systemEventNotice,
+					Data:   client.id + "进入聊天室",
+					From:   "系统消息",
+					RoomId: client.roomId,
+					Time:   time.Now().Format(timeLayout),
+				})
 			}
 		case clientEventText:
-			manager.DealMsg(Msg{
-				Data:   msg.Data,
-				From:   client.id,
-				RoomId: client.roomId,
-				Time:   time.Now().Format(timeLayout),
-			})
+			if 0 != len(msg.Data) {
+				manager.DealMsg(Msg{
+					Event:  msg.Event,
+					Data:   msg.Data,
+					From:   client.id,
+					RoomId: client.roomId,
+					Time:   time.Now().Format(timeLayout),
+				})
+			}
 		}
 	}
 }
