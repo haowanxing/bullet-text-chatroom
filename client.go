@@ -61,7 +61,9 @@ func (client *Client) shit() {
 
 		switch msg.Event {
 		case clientEventName:
-			client.id = msg.Data
+			if 0 != len(msg.Data) {
+				client.id = msg.Data
+			}
 		case clientEventRoom:
 			if broadcastRoomId != msg.Data && client.roomId != msg.Data {
 				client.roomId = msg.Data
