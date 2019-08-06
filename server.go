@@ -12,6 +12,7 @@ import (
 
 const TemplateDir = "template/"
 const PageHome = "index.html"
+const PageCanvas = "canvas.html"
 
 func Serve(port int) {
 	if port < 0 || port > 65535 {
@@ -32,9 +33,12 @@ func server(port int) {
 
 	// 绑定WebSocket服务路径
 	http.Handle("/ws", websocket.Handler(WsHandler))
+	// 静态文件
+	fServer := http.FileServer(http.Dir("statics"))
+	http.Handle("/statics/", http.StripPrefix("/statics/", fServer))
 	// Web节点
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		t, err := template.ParseFiles(TemplateDir + PageHome)
+		t, err := template.ParseFiles(TemplateDir + PageCanvas)
 		if err != nil {
 			log.Printf("[System] Server error: %+v", err)
 		}
