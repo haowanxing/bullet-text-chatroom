@@ -17,7 +17,7 @@
         您的浏览器不支持canvas标签。
     </canvas>
 </div>
-<div id="messages" style=" height: 100px; overflow: auto; border: solid 1px gray; padding: 5px; ">
+<div id="messages" style=" height: 100px; width: 100%; overflow: auto; border: solid 1px gray; padding: 5px; margin: 1px auto;">
 
 </div>
 <div class="screen_toolbar">
@@ -109,6 +109,7 @@
             }
             let p = document.createElement("p");
             p.style.margin = "0";
+            p.style.color = data.event == "text"?"black":"red";
             p.innerText = "[" + (data.time).split(" ")[1] + "] " + data.from + ": " + data.data;
             let Div = document.getElementById("messages");
             Div.append(p);
@@ -130,10 +131,14 @@
         client.wsOnClose(onClose);
         client.wsOnError(onClose);
         client.connect();
-        document.getElementById("send").onclick = function () {
+        let sendText = function () {
             let msg = document.getElementById("screenBulletText").value;
             client.sendText(msg);
             document.getElementById("screenBulletText").value = "";
+        };
+        document.getElementById("send").onclick = sendText;
+        document.getElementById("screenBulletText").onkeydown = function(ev){
+            (ev.key == "Enter" && sendText())
         };
         document.getElementById("changeName").onclick = function () {
             let msg = document.getElementById("name").value;
