@@ -12,10 +12,8 @@
 </header>
 <!--弹幕实现来源：https://www.bestvist.com/p/36 作者：bestvist-->
 <!--弹幕实现来源：https://segmentfault.com/a/1190000011723466 作者：bestvist-->
-<div style="position:relative;width:500px;height:400px;text-align:center;background-color: black">
-    <canvas id="canvas" width="500" height="400" style="position:absolute;top:0;left:0;">
-        您的浏览器不支持canvas标签。
-    </canvas>
+<div id="screen" style="position:relative;height:400px;text-align:center;background-color: black">
+
 </div>
 <div id="messages" style=" height: 100px; width: 100%; overflow: auto; border: solid 1px gray; padding: 5px; margin: 1px auto;">
 
@@ -100,6 +98,19 @@
 
         }
 
+        (function(p, n){
+            let screenDiv = document.getElementById(p);
+            screenDiv.style.width = document.body.clientWidth+"px";
+            let canvas = document.createElement("canvas");
+            canvas.id = n;
+            canvas.height = 400;
+            canvas.width = document.body.clientWidth;
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.innerText = "您的浏览器不支持canvas标签。";
+            screenDiv.appendChild(canvas)
+        })("screen","canvas");
         let barrage = new Barrage('canvas');
         barrage.draw();
 
