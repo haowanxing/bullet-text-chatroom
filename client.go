@@ -1,9 +1,7 @@
 package bullet_text_chatroom
 
 import (
-	"encoding/json"
-	"golang.org/x/net/websocket"
-	"io"
+	"github.com/gorilla/websocket"
 	"log"
 	"time"
 )
@@ -29,9 +27,7 @@ type ClientMsg struct {
 
 func (client *Client) eat() {
 	for msg := range client.sendChan {
-		msgByte, _ := json.Marshal(msg)
-
-		if _, err := client.socket.Write(msgByte); err != nil {
+		if err := client.socket.WriteJSON(msg); err != nil {
 			log.Printf("[System] write msg err: %+v", err)
 			manager.Leave(client)
 			break
@@ -42,19 +38,9 @@ func (client *Client) eat() {
 
 func (client *Client) shit() {
 	for {
-		var shit string
-		if err := websocket.Message.Receive(client.socket, &shit); err != nil {
-			if err != io.EOF {
-				log.Printf("[System] can not catch client's shit. so dirty: %+v", err)
-			} else {
-				log.Printf("[System] client Leave: %+v", client.id)
-			}
-			manager.Leave(client)
-			break
-		}
 		var msg = &ClientMsg{Time: time.Now().Format(timeLayout)}
-		if err := json.Unmarshal([]byte(shit), msg); err != nil {
-			log.Printf("[System] can not json client's shit. so bad: %+v", err)
+		if err := client.socket.ReadJSON(&msg); err != nil {
+			log.Printf("[System] client Leave: %+v", client.id)
 			manager.Leave(client)
 			break
 		}

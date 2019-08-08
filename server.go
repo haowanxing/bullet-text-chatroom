@@ -3,7 +3,7 @@ package bullet_text_chatroom
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/net/websocket"
+	"github.com/gorilla/websocket"
 	"html/template"
 	"log"
 	"net/http"
@@ -32,7 +32,8 @@ func server(port int) {
 	}()
 
 	// 绑定WebSocket服务路径
-	http.Handle("/ws", websocket.Handler(WsHandler))
+	//http.Handle("/ws", websocket.Handler(WsHandler))
+	http.HandleFunc("/ws", Upgrade)
 	// 静态文件
 	fServer := http.FileServer(http.Dir("statics"))
 	http.Handle("/statics/", http.StripPrefix("/statics/", fServer))
@@ -45,6 +46,19 @@ func server(port int) {
 		_ = t.Execute(writer, nil)
 	})
 	log.Println(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+}
+
+func Upgrade(w http.ResponseWriter, r *http.Request) {
+	var upgrader = websocket.Upgrader{
+		WriteBufferSize: 1024,
+		ReadBufferSize:  1024,
+		CheckOrigin:     func(r *http.Request) bool { return true },
+	}
+	if ws, err := upgrader.Upgrade(w, r, nil); err == nil {
+		WsHandler(ws)
+	} else {
+		log.Printf("[System] Server error: %+v", err)
+	}
 }
 
 func WsHandler(ws *websocket.Conn) {
